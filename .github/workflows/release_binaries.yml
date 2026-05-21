@@ -69,3 +69,35 @@ jobs:
         with:
           name: Windows Release
           path: build/compose/binaries/main-release/exe
+
+  ubuntu-binary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: Build deb app
+        run: ./gradlew packageReleaseDeb
+
+      - name: Upload to Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} \
+            build/compose/binaries/main-release/deb/*.deb \
+            --repo ${{ github.repository }}
+
+      - name: Archive Artifacts (for workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v7
+        with:
+          name: Ubuntu Release
+          path: build/compose/binaries/main-release/deb
