@@ -104,7 +104,8 @@ compose.desktop {
             }
 
             linux {
-                iconFile.set(project.file("icon.ico"))
+                shortcut = true
+                iconFile.set(project.file("icon.png"))
             }
         }
     }
